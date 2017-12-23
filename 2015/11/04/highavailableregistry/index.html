@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Docker,Registry," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="理想的路上" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="本文用于搭建一个基于haproxy和keepalived的高可用的私有docker registry 部署结构 haproxy keepalived 主：221.228.86.4 haproxy keepalived 备：221.228.86.5 docker registry 1：    221.228.86.6 docker registry 2：    221.228.86.67 VIP :">
+<meta name="keywords" content="Docker,Registry">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于haproxy和keepalived的高可用的私有docker registry">
+<meta property="og:url" content="http://aoxn.github.io/2015/11/04/highavailableregistry/index.html">
+<meta property="og:site_name" content="理想的路上">
+<meta property="og:description" content="本文用于搭建一个基于haproxy和keepalived的高可用的私有docker registry 部署结构 haproxy keepalived 主：221.228.86.4 haproxy keepalived 备：221.228.86.5 docker registry 1：    221.228.86.6 docker registry 2：    221.228.86.67 VIP :">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-12-07T15:16:55.645Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="基于haproxy和keepalived的高可用的私有docker registry">
+<meta name="twitter:description" content="本文用于搭建一个基于haproxy和keepalived的高可用的私有docker registry 部署结构 haproxy keepalived 主：221.228.86.4 haproxy keepalived 备：221.228.86.5 docker registry 1：    221.228.86.6 docker registry 2：    221.228.86.67 VIP :">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://aoxn.github.io/2015/11/04/highavailableregistry/"/>
+
+
+
+
+
+  <title>基于haproxy和keepalived的高可用的私有docker registry | 理想的路上</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">理想的路上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一路前行</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://aoxn.github.io/2015/11/04/highavailableregistry/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="spacexnice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/headpic.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="理想的路上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">基于haproxy和keepalived的高可用的私有docker registry</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-11-04T22:02:11+08:00">
+                2015-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/容器/" itemprop="url" rel="index">
+                    <span itemprop="name">容器</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/容器/Docker/" itemprop="url" rel="index">
+                    <span itemprop="name">Docker</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文用于搭建一个基于haproxy和keepalived的高可用的私有docker registry</p>
+<h2 id="部署结构"><a href="#部署结构" class="headerlink" title="部署结构"></a>部署结构</h2><ul>
+<li>haproxy keepalived 主：221.228.86.4</li>
+<li>haproxy keepalived 备：221.228.86.5</li>
+<li>docker registry 1：    221.228.86.6</li>
+<li>docker registry 2：    221.228.86.67</li>
+<li>VIP : 221.228.86.70 </li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">                    221.228.86.100</span><br><span class="line">             +-----------VIP----------+   </span><br><span class="line">             |                        |</span><br><span class="line">             |                        |</span><br><span class="line">           Master                   Backup</span><br><span class="line">        221.228.86.4             221.228.86.6</span><br><span class="line">        +----------+             +----------+</span><br><span class="line">        | HAProxy  |             | HAProxy  |</span><br><span class="line">        |keepalived|             |keepalived|</span><br><span class="line">        +----------+             +----------+</span><br><span class="line">             |  </span><br><span class="line">             v  </span><br><span class="line">    +--------+---------+ </span><br><span class="line">    |        |         |</span><br><span class="line">    |        |         |</span><br><span class="line">    v        v         v</span><br><span class="line">+------+  +------+  +------+</span><br><span class="line">| WEB1 |  | WEB2 |  | WEB3 |</span><br><span class="line">+------+  +------+  +------+</span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h4 id="修改docker-daemon-启动参数"><a href="#修改docker-daemon-启动参数" class="headerlink" title="修改docker daemon 启动参数"></a>修改docker daemon 启动参数</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">修改/etc/default/docker文件，在DOCKER_OPTS=<span class="string">"--insecure-registry vip:5000"</span></span><br></pre></td></tr></table></figure>
+<h2 id="Docker-Registry-配置"><a href="#Docker-Registry-配置" class="headerlink" title="Docker Registry 配置"></a>Docker Registry 配置</h2><ul>
+<li>参考 <a href="https://github.com/docker/distribution/blob/master/docs/configuration.md" target="_blank" rel="noopener">https://github.com/docker/distribution/blob/master/docs/configuration.md</a></li>
+<li>221.228.86.5 221.228.86.67</li>
+<li>在/var/lib/pri_docker_registry/目录下建立config.yml配置文件,内容如下：</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">version: 0.1</span><br><span class="line"><span class="built_in">log</span>:</span><br><span class="line">  level: debug</span><br><span class="line">  formatter: json</span><br><span class="line">  fields:</span><br><span class="line">    service: registry</span><br><span class="line">  hooks:</span><br><span class="line">    - <span class="built_in">type</span>: mail</span><br><span class="line">      disabled: <span class="literal">true</span></span><br><span class="line">      levels:</span><br><span class="line">        - panic</span><br><span class="line">      options:</span><br><span class="line">        smtp:</span><br><span class="line">          addr: mail.yy.com:25</span><br><span class="line">          username: xxx</span><br><span class="line">          password: pass</span><br><span class="line">          insecure: <span class="literal">true</span></span><br><span class="line">        from: sender@yy.com</span><br><span class="line">        to:</span><br><span class="line">          - errors@yy.com</span><br><span class="line">storage:</span><br><span class="line">    filesystem:</span><br><span class="line">        rootdirectory: /var/lib/registry</span><br><span class="line">    delete:</span><br><span class="line">      enabled: <span class="literal">true</span></span><br><span class="line">    redirect:</span><br><span class="line">      <span class="built_in">disable</span>: <span class="literal">false</span></span><br><span class="line">http:</span><br><span class="line">    addr: :5000</span><br><span class="line">    headers:</span><br><span class="line">        X-Content-Type-Options: [nosniff]</span><br><span class="line">health:</span><br><span class="line">  storagedriver:</span><br><span class="line">    enabled: <span class="literal">true</span></span><br><span class="line">    interval: 10s</span><br><span class="line">    threshold: 3</span><br></pre></td></tr></table></figure>
+<ul>
+<li>在docker registry 1 、2、3上分别执行如下命令</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p /var/lib/registry</span><br><span class="line">$ docker run -d -p 5000:5000 --net=host --restart=always -v /var/lib/pri_docker_registry/config.yml:/etc/docker/registry/config.yml -v /var/lib/registry:/var/lib/registry -v /etc/ceph/:/etc/ceph/ --name docker-registry registry:2.1</span><br></pre></td></tr></table></figure>
+<p>一定要将ceph的配置文件挂载进入容器，rados访问ceph需要</p>
+<ul>
+<li>配置iptables规则，只允许proxy机器访问</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ iptables -A INPUT -d 221.228.86.67/32 -m comment --comment <span class="string">"not allow to be connected except proxy"</span> -j DROP</span><br><span class="line">$ iptables -I INPUT 1 -s 221.228.86.4 -d 221.228.86.67 -j ACCEPT</span><br><span class="line">$ iptables -I INPUT 1 -s 221.228.86.6 -d 221.228.86.67 -j ACCEPT</span><br><span class="line"><span class="comment"># 添加办公网的访问</span></span><br><span class="line">$ iptables -I INPUT -s 183.60.177.224/27 -d 221.228.86.70/32 -j ACCEPT</span><br><span class="line">  <span class="comment"># 配置221.228.86.6</span></span><br><span class="line">$ iptables -A INPUT -d 221.228.86.5/32 -m comment --comment <span class="string">"not allow to be connected except proxy"</span> -j DROP</span><br><span class="line">$ iptables -I INPUT 1 -s 221.228.86.4 -d 221.228.86.5 -j ACCEPT</span><br><span class="line">$ iptables -I INPUT 1 -s 221.228.86.6 -d 221.228.86.5 -j ACCEPT</span><br><span class="line">$ iptables -I INPUT -s 183.60.177.224/27 -d 221.228.86.70/32 -j ACCEPT</span><br></pre></td></tr></table></figure>
+<h2 id="Haproxy-配置"><a href="#Haproxy-配置" class="headerlink" title="Haproxy 配置"></a>Haproxy 配置</h2><ul>
+<li>参考 <a href="https://hub.docker.com/_/haproxy/" target="_blank" rel="noopener">https://hub.docker.com/_/haproxy/</a></li>
+<li>在haproxy 主备上分别执行下面命令,在/var/lib/hadporxy/目录下建立haproxy.cfg配置文件,内容如下:</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">global</span><br><span class="line">    <span class="built_in">log</span> 127.0.0.1 local3 info</span><br><span class="line">    maxconn 4096</span><br><span class="line">    nbproc 1</span><br><span class="line">    pidfile /var/lib/haproxy/haproxy.pid</span><br><span class="line">defaults</span><br><span class="line">    maxconn 2000</span><br><span class="line">    timeout connect 5000</span><br><span class="line">    timeout client 30000</span><br><span class="line">    timeout server 30000</span><br><span class="line">    mode http</span><br><span class="line">    stats uri /admin?stats</span><br><span class="line">    option forwardfor</span><br><span class="line">frontend http_server</span><br><span class="line">    <span class="built_in">bind</span> :5000</span><br><span class="line">    <span class="built_in">log</span> global</span><br><span class="line">    default_backend docker-registry</span><br><span class="line">    <span class="comment">#acl test hdr_dom(host) -i test.domain.com</span></span><br><span class="line">    <span class="comment">#use_backend cache_test if test</span></span><br><span class="line">backend docker-registry</span><br><span class="line">    <span class="comment">#balance roundrobin</span></span><br><span class="line">    balance <span class="built_in">source</span></span><br><span class="line">    option httpchk GET /v2/ HTTP/1.1\r\nHost:221.228.86.6</span><br><span class="line">    server inst1 221.228.86.5:5000 check inter 5000 fall 3</span><br><span class="line">    server inst2 221.228.86.67:5000 check inter 5000 fall 3</span><br><span class="line"><span class="comment">#HAProxy管理页面 </span></span><br><span class="line">listen admin_stat</span><br><span class="line">    <span class="built_in">bind</span> *:1158                    <span class="comment">#管理页面端口</span></span><br><span class="line">    mode http                        </span><br><span class="line">    stats refresh 10s                <span class="comment">#自动刷新时间</span></span><br><span class="line">    stats uri /haproxy                 <span class="comment">#页面名称</span></span><br><span class="line">    stats realm Haproxy\ Statistics     <span class="comment">#登录提示</span></span><br><span class="line">    stats auth admin:admin    <span class="comment">#帐号密码</span></span><br><span class="line">    stats hide-version </span><br><span class="line">stats admin <span class="keyword">if</span> TRUE</span><br></pre></td></tr></table></figure>
+<h4 id="创建haproxy-registry容器"><a href="#创建haproxy-registry容器" class="headerlink" title="创建haproxy-registry容器"></a>创建haproxy-registry容器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p /var/lib/haproxy</span><br><span class="line">$ docker run -d --name haproxy-registry --net=host -v /var/lib/haproxy/haproxy.cfg:/usr/<span class="built_in">local</span>/etc/haproxy/haproxy.cfg:ro haproxy:1.5</span><br></pre></td></tr></table></figure>
+<h4 id="清除Iptables-规则，目前让所有机器都能访问该proxy"><a href="#清除Iptables-规则，目前让所有机器都能访问该proxy" class="headerlink" title="清除Iptables 规则，目前让所有机器都能访问该proxy"></a>清除Iptables 规则，目前让所有机器都能访问该proxy</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ iptables -D INPUT -d 221.228.86.5/32 -m comment --comment sigma -j DROP</span><br></pre></td></tr></table></figure>
+<h2 id="Keepalived主备配置"><a href="#Keepalived主备配置" class="headerlink" title="Keepalived主备配置"></a>Keepalived主备配置</h2><p>使用Keeplalived管理浮动IP</p>
+<ul>
+<li>在221.228.86.4 221.228.86.6机器上同时安装keepalived，keepalived配置文件区别设置<h4 id="Ubuntu-Keepalived安装"><a href="#Ubuntu-Keepalived安装" class="headerlink" title="Ubuntu Keepalived安装"></a>Ubuntu Keepalived安装</h4></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ apt-get install keepalived</span><br></pre></td></tr></table></figure>
+<h4 id="Master（221-228-86-4）服务器配置-etc-keepalived-keepalived-conf"><a href="#Master（221-228-86-4）服务器配置-etc-keepalived-keepalived-conf" class="headerlink" title="Master（221.228.86.4）服务器配置 /etc/keepalived/keepalived.conf"></a>Master（221.228.86.4）服务器配置 /etc/keepalived/keepalived.conf</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">       xieyaoyao@yy.com</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from mail@example.org</span><br><span class="line">   smtp_server mail.yy.com</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">#监测haproxy进程状态，每2秒执行一次</span></span><br><span class="line">vrrp_script chk_haproxy &#123;</span><br><span class="line">    script <span class="string">"/usr/local/keepalived/chk_haproxy.sh"</span></span><br><span class="line">    interval 2</span><br><span class="line">    weight 2</span><br><span class="line">&#125;</span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state MASTER <span class="comment">#标示状态为MASTER</span></span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 101   <span class="comment">#MASTER权重要高于BACKUP</span></span><br><span class="line">    advert_int 1</span><br><span class="line">    mcast_src_ip 221.228.86.4 <span class="comment">#Master服务器IP</span></span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS <span class="comment">#主从服务器验证方式</span></span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_haproxy <span class="comment">#监测haproxy进程状态</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">#VIP</span></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        221.228.86.70 <span class="comment">#虚拟IP</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Backup（221-228-86-6）服务器上的配置-etc-keepalived-keepalived-conf"><a href="#Backup（221-228-86-6）服务器上的配置-etc-keepalived-keepalived-conf" class="headerlink" title="Backup（221.228.86.6）服务器上的配置 /etc/keepalived/keepalived.conf"></a>Backup（221.228.86.6）服务器上的配置 /etc/keepalived/keepalived.conf</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">global_defs &#123;</span><br><span class="line">   notification_email &#123;</span><br><span class="line">   user@example.com</span><br><span class="line">   &#125;</span><br><span class="line">   notification_email_from mail@example.org</span><br><span class="line">   smtp_server 192.168.x.x</span><br><span class="line">   smtp_connect_timeout 30</span><br><span class="line">   router_id LVS_DEVEL</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">#监测haproxy进程状态，每2秒执行一次</span></span><br><span class="line">vrrp_script chk_haproxy &#123;</span><br><span class="line">    script <span class="string">"/usr/local/keepalived/chk_haproxy.sh"</span></span><br><span class="line">    interval 2</span><br><span class="line">    weight 2</span><br><span class="line">&#125;</span><br><span class="line">vrrp_instance VI_1 &#123;</span><br><span class="line">    state BACKUP <span class="comment">#状态为BACKUP</span></span><br><span class="line">    interface eth0</span><br><span class="line">    virtual_router_id 51</span><br><span class="line">    priority 100  <span class="comment">#权重要低于MASTER</span></span><br><span class="line">    advert_int 1</span><br><span class="line">    mcast_src_ip 221.228.86.6 <span class="comment">#Backup服务器的IP</span></span><br><span class="line">    authentication &#123;</span><br><span class="line">        auth_type PASS</span><br><span class="line">        auth_pass 1111</span><br><span class="line">    &#125;</span><br><span class="line">    track_script &#123;</span><br><span class="line">        chk_haproxy <span class="comment">#监测haproxy进程状态</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">#VIP</span></span><br><span class="line">    virtual_ipaddress &#123;</span><br><span class="line">        221.228.86.70 <span class="comment">#虚拟IP</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="chk-haproxy-sh内容-usr-local-keepalived-chk-haproxy-sh"><a href="#chk-haproxy-sh内容-usr-local-keepalived-chk-haproxy-sh" class="headerlink" title="chk_haproxy.sh内容 /usr/local/keepalived/chk_haproxy.sh"></a>chk_haproxy.sh内容 /usr/local/keepalived/chk_haproxy.sh</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># author: weizhifeng</span></span><br><span class="line"><span class="comment"># description: </span></span><br><span class="line"><span class="comment"># 定时查看haproxy是否存在，如果不存在则启动haproxy，</span></span><br><span class="line"><span class="comment"># 如果启动失败，则停止keepalived</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line">status=$(docker inspect  -f <span class="string">"&#123;&#123;.State.Running&#125;&#125;"</span> haproxy-registry)</span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;status&#125;</span>"</span> = <span class="string">"false"</span> ]; <span class="keyword">then</span></span><br><span class="line">    docker start haproxy-registry</span><br><span class="line">    status2=$(docker inspect  -f <span class="string">"&#123;&#123;.State.Running&#125;&#125;"</span> haproxy-registry)</span><br><span class="line">    <span class="keyword">if</span> [ <span class="string">"<span class="variable">$&#123;status2&#125;</span>"</span> = <span class="string">"false"</span>  ]; <span class="keyword">then</span></span><br><span class="line">            service keepalived stop</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line"><span class="keyword">fi</span></span><br></pre></td></tr></table></figure>
+<h4 id="启动keepalived服务"><a href="#启动keepalived服务" class="headerlink" title="启动keepalived服务"></a>启动keepalived服务</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ service keepalived start</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Docker/" rel="tag"># Docker</a>
+          
+            <a href="/tags/Registry/" rel="tag"># Registry</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/05/keyjump/" rel="prev" title="关于从x86实模式到保护模式的关键一跳的指令连续执行问题">
+                关于从x86实模式到保护模式的关键一跳的指令连续执行问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/headpic.jpg"
+                alt="spacexnice" />
+            
+              <p class="site-author-name" itemprop="name">spacexnice</p>
+              <p class="site-description motion-element" itemprop="description">知识在于分享</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">5</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/aoxn" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:spacex_nice@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#部署结构"><span class="nav-number">1.</span> <span class="nav-text">部署结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#修改docker-daemon-启动参数"><span class="nav-number">1.0.1.</span> <span class="nav-text">修改docker daemon 启动参数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Docker-Registry-配置"><span class="nav-number">2.</span> <span class="nav-text">Docker Registry 配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Haproxy-配置"><span class="nav-number">3.</span> <span class="nav-text">Haproxy 配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#创建haproxy-registry容器"><span class="nav-number">3.0.1.</span> <span class="nav-text">创建haproxy-registry容器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#清除Iptables-规则，目前让所有机器都能访问该proxy"><span class="nav-number">3.0.2.</span> <span class="nav-text">清除Iptables 规则，目前让所有机器都能访问该proxy</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Keepalived主备配置"><span class="nav-number">4.</span> <span class="nav-text">Keepalived主备配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Ubuntu-Keepalived安装"><span class="nav-number">4.0.1.</span> <span class="nav-text">Ubuntu Keepalived安装</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Master（221-228-86-4）服务器配置-etc-keepalived-keepalived-conf"><span class="nav-number">4.0.2.</span> <span class="nav-text">Master（221.228.86.4）服务器配置 /etc/keepalived/keepalived.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Backup（221-228-86-6）服务器上的配置-etc-keepalived-keepalived-conf"><span class="nav-number">4.0.3.</span> <span class="nav-text">Backup（221.228.86.6）服务器上的配置 /etc/keepalived/keepalived.conf</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#chk-haproxy-sh内容-usr-local-keepalived-chk-haproxy-sh"><span class="nav-number">4.0.4.</span> <span class="nav-text">chk_haproxy.sh内容 /usr/local/keepalived/chk_haproxy.sh</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#启动keepalived服务"><span class="nav-number">4.0.5.</span> <span class="nav-text">启动keepalived服务</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">spacexnice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
