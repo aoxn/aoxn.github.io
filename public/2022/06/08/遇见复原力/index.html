@@ -1,37 +1,796 @@
-{% extends '_layout.swig' %}
-{% import '_macro/post.swig' as post_template %}
-{% import '_macro/sidebar.swig' as sidebar_template %}
+<!DOCTYPE html>
 
 
-{% block title %}{{ page.title }} | {{ config.title }}{% endblock %}
 
-{% block page_class %}page-post-detail{% endblock %}
+  
 
 
-{% block content %}
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="aoxn, kubernetes" />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="理想的路上" type="application/atom+xml" />
+
+
+
+
+
+
+<meta name="description" content="复原力复原力一词来源于微软创新研究院，全称是社会复原力，它研究的是通过大规模部署可以适应未来各种变数以及不确定性的创新技术来应对社会的各种潜在危机，从而增强社会复原力。如COVID-19、全球气候变暖、环境污染，探索在危机来临前中后的创新技术储备，快速应对方法，快速复原的能力。是一种从无序和混乱中回归秩序的能力。这也是运维所要解决的问题，让系统回归秩序。 本文探索的是云原生时代下容器基础设施在面临">
+<meta property="og:type" content="article">
+<meta property="og:title" content="遇见复原力">
+<meta property="og:url" content="http://aoxn.github.io/2022/06/08/%E9%81%87%E8%A7%81%E5%A4%8D%E5%8E%9F%E5%8A%9B/index.html">
+<meta property="og:site_name" content="理想的路上">
+<meta property="og:description" content="复原力复原力一词来源于微软创新研究院，全称是社会复原力，它研究的是通过大规模部署可以适应未来各种变数以及不确定性的创新技术来应对社会的各种潜在危机，从而增强社会复原力。如COVID-19、全球气候变暖、环境污染，探索在危机来临前中后的创新技术储备，快速应对方法，快速复原的能力。是一种从无序和混乱中回归秩序的能力。这也是运维所要解决的问题，让系统回归秩序。 本文探索的是云原生时代下容器基础设施在面临">
+<meta property="og:locale">
+<meta property="article:published_time" content="2022-06-08T04:32:49.000Z">
+<meta property="article:modified_time" content="2022-06-08T10:55:59.768Z">
+<meta property="article:author" content="spacexnice">
+<meta name="twitter:card" content="summary">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://aoxn.github.io/2022/06/08/遇见复原力/"/>
+
+
+
+
+
+  <title>遇见复原力 | 理想的路上</title>
+  
+
+
+
+
+
+
+
+
+<meta name="generator" content="Hexo 6.2.0"></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">理想的路上</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">一路前行</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
 
   <div id="posts" class="posts-expand">
-    {{ post_template.render(page) }}
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://aoxn.github.io/2022/06/08/%E9%81%87%E8%A7%81%E5%A4%8D%E5%8E%9F%E5%8A%9B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/headpic.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="理想的路上">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">遇见复原力</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2022-06-08T12:32:49+08:00">
+                2022-06-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="复原力"><a href="#复原力" class="headerlink" title="复原力"></a>复原力</h2><p>复原力一词来源于微软创新研究院，全称是社会复原力，它研究的是通过大规模部署可以适应未来各种变数以及不确定性的创新技术来应对社会的各种潜在危机，从而增强社会复原力。如COVID-19、全球气候变暖、环境污染，探索在危机来临前中后的创新技术储备，快速应对方法，快速复原的能力。是一种从无序和混乱中回归秩序的能力。这也是运维所要解决的问题，让系统回归秩序。</p>
+<p>本文探索的是云原生时代下容器基础设施在面临各种危机时的复原力问题，即基础设施复原力。</p>
+<h2 id="基础设施复原力"><a href="#基础设施复原力" class="headerlink" title="基础设施复原力"></a>基础设施复原力</h2><p>随着容器技术的不断发展，k8s已经成为了云原生时代下的基础设施，它为应用向下屏蔽了云上基础设施的复杂性，向上提供了应用的全生命周期管理能力，将分布式应用管理的复杂性收敛转化到了分布式系统本身的管理问题上。然而，它虽然解决了应用在分布式环境下的编排问题，但自身的分布式系统的运维复杂性仍然存在。底层基础设施失效，可用区故障，节点故障，组件失效，网络分区，抖动，甚至地震、火灾等风险始终存在，如何保证系统的稳定性以及面对这些危机时候的系统复原力是一项非常具有挑战的工作，这也构成了云原生时代下的基础设施复原力问题。</p>
+<p>事实上，k8s面向终态的设计已经让应用具备了从外部扰动中回到稳态的能力，面对应用进程异常退出，容器失败，网络故障，配置紊乱等问题，k8s能够实现检测并自行原地恢复，或者替换掉失效应用副本来使应用处于预期状态，这是k8s的应用复原力。通过以上理念，我们希望云原生时代的基础设施也能具备从外部扰动中自动回归稳态的能力，同时以一种尽可能小的代价去解决k8s平台自身运维复杂性的问题，因此我们设计了<code>wdrip</code>，以一种逐渐收敛的方案来解决k8s分布式系统的自动化运维问题，实现基础设施的复原力。</p>
+<h2 id="故障复原场景示例"><a href="#故障复原场景示例" class="headerlink" title="故障复原场景示例"></a>故障复原场景示例</h2><p>k8s 面向终态的设计为应用的复原力提供了支撑。从终态设计上你能看到k8s 让应用从外部扰动中回归稳态的思想, wdrip也同样采用面向终态的思想，在基础设施层解决k8s的自运维问题。下面会演示一些常见的k8s故障场景，并且观察系统是如何在无人为干预的情况下自动恢复的。</p>
+<h3 id="前置条件"><a href="#前置条件" class="headerlink" title="前置条件"></a>前置条件</h3><p>wdrip的基本功能及其使用，请移步<a href="./get-start.md">【GET-STARTED】</a></p>
+<ul>
+<li><p>请使用wdrip创建一个k8s集群。</p>
+</li>
+<li><p>请部署示例应用，或者部署您自己觉得合适的<a href="./demo-application.md">容器化应用</a>。</p>
+</li>
+</ul>
+<h3 id="场景一：节点故障"><a href="#场景一：节点故障" class="headerlink" title="场景一：节点故障"></a>场景一：节点故障</h3><p>节点故障是k8s集群故障里最常见的一种场景了，也是危害相对较小的故障，wdrip可以侦测节点的异常状态，然后尝试修复。修复的流程如下<br>如果节点状态变为NotReady，那么等待2个heartbeat周期</p>
+<ul>
+<li>如果周期内持续NotReady，wdrip尝试重启kubelet，并等待节点Ready</li>
+<li>如果节点仍然NotReady，wdrip尝试驱逐节点Pod，然后继续尝试重启ECS，并等待节点Ready</li>
+<li>如果节点仍然NotReady，wdrip继续尝试重置ECS（替换节点的系统盘，并重新初始化节点），并等待节点Ready</li>
+<li>如果节点仍然NotReady，wdrip删除这个节点，等待系统重启创建一个全新的节点副本。</li>
+<li>如果节点仍然NotReady，修复失败。等待throttle周期后重复以上步骤。</li>
+</ul>
+<p>通常可以通过以下手段模拟节点故障：</p>
+<ol>
+<li>方法一：通过<code>kubectl delete no $&#123;your-node&#125;</code> 删除对应的Node Object。等待节点自动恢复并注册回来，恢复全程无需人工干预，时长约2分钟。</li>
+<li>方法二：登录ECS节点，systemctl stop kubelet&#x2F;docker等。等待节点NotReady后，系统会自行恢复节点状态。恢复全程无需人工干预。</li>
+<li>方法三：到ECS控制台上【关闭】节点对应的ECS。系统会自行恢复节点状态。恢复全程无需人工干预。</li>
+<li>方法四：到ECS控制台上【删除】节点对应的ECS。系统会自行恢复节点状态。恢复全程无需人工干预。</li>
+</ol>
+<p><a href="./manage-cluster.md">去试一试</a></p>
+<h3 id="场景二：管控故障"><a href="#场景二：管控故障" class="headerlink" title="场景二：管控故障"></a>场景二：管控故障</h3><p>管控故障通常情况下是比较严重的，k8s集群依赖etcd组成高可用集群，一旦etcd quorum丢失，集群管控将会直接不可用。因此正常情况下管控的恢复要更加的复杂。<br>wdrip精心抽象了管控的恢复流程，操作前会尽量确保etcd quorum始终保持在可用状态。但仍然具备在quorum丢失的情况下从混乱中使用snapshot恢复集群管控。</p>
+<p>通常可以通过以下方法模拟管控故障：</p>
+<ol>
+<li>方法一：通过kubectl命令删除master node。</li>
+<li>方法二：登录Master节点ECS，stop ETCD服务，删除etcd数据，stop kubelet服务，stop docker服务等。</li>
+<li>方法三：登录ECS控制台【关闭】一台Master节点ECS。</li>
+<li>方法四：登录ECS控制台【删除】一台Master节点ECS。</li>
+</ol>
+<p>对于3个master或更多个master副本的集群，你可以操作让一台ECS节点故障，等待查看系统如何回复到稳定状态，这个过程中整个系统全程仍然可以提供服务。重要的是，你可以操作多台Master ECS节点，让他们同时处于故障状态，这时候系统大概率会因为quorum丢失从而造成集群不可用，但你仍然能够观察到wdrip会通过各种手段将集群恢复到正常的稳定状态，并且无需人工干预。<br>对于worker节点，只要不涉及到管控面访问相关的业务，恢复的过程中用户的业务将不受任何影响，实现业务的连续性。</p>
+<h3 id="场景三：可用区故障"><a href="#场景三：可用区故障" class="headerlink" title="场景三：可用区故障"></a>场景三：可用区故障</h3><p>虽然可用区级别的故障的概率非常低，但我们仍然在设计的时候考虑到这种场景，wdrip支持创建跨可用区的集群，添加多个不同可用区的节点池可以让节点分布到不同可用区，提高集群面对可用区故障时候的韧性。</p>
+<p>当管控所在的可用区出现故障时候，集群不可用，集群上的应用大概率也会不可用，wdrip支持snapshot整个k8s集群，然后在其他可用区使用该snapshot一键重新拉起一个一模一样的集群，这种恢复方式保留了所有原集群的配置，唯一变化的是承载集群运行的基础设施，如ECS、SLB等等。相当于在一个新的克隆体中恢复之前备份的大脑，意识下载。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(base) ➜ wdrip recover -n kubernetes-wdrip-121 -f kubernetes-wdrip-120</span><br></pre></td></tr></table></figure>
+
+<h3 id="场景四：Region故障"><a href="#场景四：Region故障" class="headerlink" title="场景四：Region故障"></a>场景四：Region故障</h3><p>整个Region发生故障的概率应该是非常非常的低的了，但wdrip设计上仍然能够处理这种灾难。wdrip在运行时会定期备份集群的状态到OSS（可以跨Region写多份实现高可用），当Region出现故障的时候，可以尝试在另外一个Region创建一个新的集群，然后通过备份的snapshot快速恢复业务。参考可用区故障。但目前很多存储资源是可用区级别的，因此还需要进一步考虑存储的跨Region恢复。</p>
+<h3 id="场景五：删库跑路"><a href="#场景五：删库跑路" class="headerlink" title="场景五：删库跑路"></a>场景五：删库跑路</h3><p>一直想提的一个场景就是删库跑路。wdrip定期备份了整个集群的意识，无论你怎么折腾集群，只要备份存在，意识就存在，wdrip就可以再完完全全的还原出一个集群的克隆体出来，恢复现场到以前的状态。</p>
+<p><strong>删库跑路？不存在的。</strong></p>
+<p>你可以尝试删除集群试试，删除方法</p>
+<ol>
+<li>到ROS控制台删除该集群对应的ROS模板，按名称搜索即可找到对应的模板</li>
+<li>wdrip delete -n kubernetes-wdrip-120</li>
+</ol>
+<p>恢复的方法：</p>
+<ol>
+<li>创建新的集群。wdrip create –config cluster.yml</li>
+<li>恢复集群的意识备份到这个新建的集群本体上。 wdrip recover -n kubernetes-wdrip-121 -f kubernetes-wdrip-120</li>
+</ol>
+<h3 id="灾难恢复（手动）"><a href="#灾难恢复（手动）" class="headerlink" title="灾难恢复（手动）"></a>灾难恢复（手动）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -n 指定恢复的目标集群（本体）， -f 指定恢复的配置来源于哪个集群（意识）。</span></span><br><span class="line">(base) ➜ wdrip recover -n kubernetes-wdrip-121 -f kubernetes-wdrip-120</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="ChaosMonkey"><a href="#ChaosMonkey" class="headerlink" title="ChaosMonkey"></a>ChaosMonkey</h3><p>为了测试基础设施复原力我们专门编写了ChaosMonkey部署在集群中，他能够定期破坏集群(删除集群ECS资源、停止关键组件)，等待系统自愈。</p>
+<p>如何使用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(base) ➜  export CLUSTER_NAME=xxxx</span><br><span class="line">(base) ➜  bash hack/wdrip.sh config</span><br><span class="line">(base) ➜  bash hack/wdrip.sh chaos</span><br><span class="line">(base) ➜  kubectl --kubeconfig ~/.kube/config.wdrip -n kube-system get po|grep monkey</span><br></pre></td></tr></table></figure>
+
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>k8s的复杂性虽然让让人生畏，但wdrip提供的复原力让我们在面对危机的时候能够更加的从容。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/16/KuberntesAPI%E8%AE%BE%E8%AE%A1%E5%93%B2%E5%AD%A6/" rel="next" title="Kubernetes API设计哲学">
+                <i class="fa fa-chevron-left"></i> Kubernetes API设计哲学
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2022/06/08/%E7%AE%A1%E7%90%86%E9%9B%86%E7%BE%A4/" rel="prev" title="管理集群">
+                管理集群 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
 
     <div class="post-spread">
-      {% if theme.jiathis %}
-        {% include '_partials/share/jiathis.swig' %}
-      {% elseif theme.baidushare %}
-        {% include '_partials/share/baidushare.swig' %}
-      {% elseif theme.add_this_id %}
-        {% include '_partials/share/add-this.swig' %}
-      {% elseif theme.duoshuo_shortname and theme.duoshuo_share %}
-        {% include '_partials/share/duoshuo_share.swig' %}
-      {% endif %}
+      
     </div>
   </div>
 
-{% endblock %}
 
-{% block sidebar %}
-  {{ sidebar_template.render(true) }}
-{% endblock %}
+          </div>
+          
 
-{% block script_extra %}
-  {% include '_scripts/pages/post-details.swig' %}
-{% endblock %}
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/uploads/headpic.jpg"
+                alt="" />
+            
+              <p class="site-author-name" itemprop="name"></p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/%7C%7C%20archive">
+              
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">7</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          <div class="links-of-author motion-element">
+            
+              
+                <span class="links-of-author-item">
+                  <a href="https://github.com/aoxn" target="_blank" title="GitHub">
+                    
+                      <i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  <a href="mailto:spacex_nice@163.com" target="_blank" title="E-Mail">
+                    
+                      <i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E5%8E%9F%E5%8A%9B"><span class="nav-number">1.</span> <span class="nav-text">复原力</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD%E5%A4%8D%E5%8E%9F%E5%8A%9B"><span class="nav-number">2.</span> <span class="nav-text">基础设施复原力</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%85%E9%9A%9C%E5%A4%8D%E5%8E%9F%E5%9C%BA%E6%99%AF%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">故障复原场景示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E6%9D%A1%E4%BB%B6"><span class="nav-number">3.1.</span> <span class="nav-text">前置条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%B8%80%EF%BC%9A%E8%8A%82%E7%82%B9%E6%95%85%E9%9A%9C"><span class="nav-number">3.2.</span> <span class="nav-text">场景一：节点故障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BA%8C%EF%BC%9A%E7%AE%A1%E6%8E%A7%E6%95%85%E9%9A%9C"><span class="nav-number">3.3.</span> <span class="nav-text">场景二：管控故障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%B8%89%EF%BC%9A%E5%8F%AF%E7%94%A8%E5%8C%BA%E6%95%85%E9%9A%9C"><span class="nav-number">3.4.</span> <span class="nav-text">场景三：可用区故障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E5%9B%9B%EF%BC%9ARegion%E6%95%85%E9%9A%9C"><span class="nav-number">3.5.</span> <span class="nav-text">场景四：Region故障</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E4%BA%94%EF%BC%9A%E5%88%A0%E5%BA%93%E8%B7%91%E8%B7%AF"><span class="nav-number">3.6.</span> <span class="nav-text">场景五：删库跑路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%81%BE%E9%9A%BE%E6%81%A2%E5%A4%8D%EF%BC%88%E6%89%8B%E5%8A%A8%EF%BC%89"><span class="nav-number">3.7.</span> <span class="nav-text">灾难恢复（手动）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ChaosMonkey"><span class="nav-number">3.8.</span> <span class="nav-text">ChaosMonkey</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2015 &mdash; <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">spacexnice</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

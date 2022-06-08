@@ -21,8 +21,8 @@ spec:
         app: hexo
     spec:
       containers:
-      - image: registry.cn-hangzhou.aliyuncs.com/aoxn/blog:0.1-53aec2a
-        imagePullPolicy: IfNotPresent
+      - image: registry.cn-hangzhou.aliyuncs.com/aoxn/blog:0.1-df0399d
+        imagePullPolicy: Always
         name: blog
 ---
 apiVersion: v1
