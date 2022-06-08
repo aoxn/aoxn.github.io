@@ -89,7 +89,7 @@
 <meta property="og:description" content="复原力复原力一词来源于微软创新研究院，全称是社会复原力，它研究的是通过大规模部署可以适应未来各种变数以及不确定性的创新技术来应对社会的各种潜在危机，从而增强社会复原力。如COVID-19、全球气候变暖、环境污染，探索在危机来临前中后的创新技术储备，快速应对方法，快速复原的能力。是一种从无序和混乱中回归秩序的能力。这也是运维所要解决的问题，让系统回归秩序。 本文探索的是云原生时代下容器基础设施在面临">
 <meta property="og:locale">
 <meta property="article:published_time" content="2022-06-08T04:32:49.000Z">
-<meta property="article:modified_time" content="2022-06-08T12:10:56.053Z">
+<meta property="article:modified_time" content="2022-06-08T14:36:42.504Z">
 <meta property="article:author" content="spacexnice">
 <meta name="twitter:card" content="summary">
 
@@ -380,20 +380,23 @@
 <p>你可以尝试删除集群试试，删除方法</p>
 <ol>
 <li>到ROS控制台删除该集群对应的ROS模板，按名称搜索即可找到对应的模板</li>
-<li>wdrip delete -n kubernetes-wdrip-120</li>
+<li>wdrip delete -n kubernetes-id-001</li>
 </ol>
 <p>恢复的方法：</p>
 <ol>
-<li>创建新的集群。wdrip create –config cluster.yml</li>
-<li>恢复集群的意识备份到这个新建的集群本体上。 wdrip recover -n kubernetes-wdrip-121 -f kubernetes-wdrip-120</li>
+<li>创建新的集群kubernetes-id-002。<code>wdrip create --config cluster.yml</code></li>
+<li>恢复集群的意识备份到这个新建的集群本体上。 <code>wdrip recover -n kubernetes-id-002 -f kubernetes-id-001</code></li>
 </ol>
-<h3 id="灾难恢复（手动）"><a href="#灾难恢复（手动）" class="headerlink" title="灾难恢复（手动）"></a>灾难恢复（手动）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -n 指定恢复的目标集群（本体）， -f 指定恢复的配置来源于哪个集群（意识）。</span></span><br><span class="line">(base) ➜ wdrip recover -n kubernetes-wdrip-121 -f kubernetes-wdrip-120</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="灾难恢复（手动）"><a href="#灾难恢复（手动）" class="headerlink" title="灾难恢复（手动）"></a>灾难恢复（手动）</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -n 指定恢复的目标集群（本体）， -f 指定恢复的配置来源于哪个集群（意识）。</span></span><br><span class="line">(base) ➜ wdrip recover -n kubernetes-id-002 -f kubernetes-id-001</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h3 id="ChaosMonkey"><a href="#ChaosMonkey" class="headerlink" title="ChaosMonkey"></a>ChaosMonkey</h3><p>为了测试基础设施复原力我们专门编写了ChaosMonkey部署在集群中，他能够定期破坏集群(删除集群ECS资源、停止关键组件)，等待系统自愈。</p>
 <p>如何使用</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">(base) ➜  export CLUSTER_NAME=xxxx</span><br><span class="line">(base) ➜  bash hack/wdrip.sh config</span><br><span class="line">(base) ➜  bash hack/wdrip.sh chaos</span><br><span class="line">(base) ➜  kubectl --kubeconfig ~/.kube/config.wdrip -n kube-system get po|grep monkey</span><br></pre></td></tr></table></figure>
 
 <h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>k8s的复杂性虽然让让人生畏，但wdrip提供的复原力让我们在面对危机的时候能够更加的从容。</p>
+<p>以上示例所涉及到的脚步均保存于wdrip项目中，使用前请<code>git clone</code>到本地.</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(base) ➜ git clone https://github.com/aoxn/wdrip.git</span><br></pre></td></tr></table></figure>
+
 
       
     </div>
