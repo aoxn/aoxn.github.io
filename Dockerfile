@@ -1,6 +1,12 @@
-FROM registry.cn-hangzhou.aliyuncs.com/spacexnice/hexo-amd64:v1.0.2
+FROM node:alpine
 COPY . /Hexo
-RUN npm install hexo --save && npm install hexo-cli -g 
-RUN bash build.sh
+WORKDIR /Hexo
+#RUN node --version && npm version && exit 1
+
+RUN npm update && \
+	npm install hexo --save && \
+	npm install hexo-cli -g && \
+	npm install
+RUN hexo clean && hexo g
 
 ENTRYPOINT ["hexo","s"]
